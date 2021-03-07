@@ -5,40 +5,39 @@ RSpec.describe Task, type: :model do
   describe 'validation' do
     # 全てが有効
     it 'is valid with all attributes' do
-      user = FactoryBot.build(:user)
-      expect(FactoryBot.build(:task, user: user)).to be_valid
+      task = build(:task)
+      expect(task).to be_valid
+      expect(task.errors).to be_empty
     end
-
+    
     # タイトルなしでは無効
     it 'is invalid without title' do
-      task = FactoryBot.build(:task, title: nil)
-      task.valid?
-      expect(task.errors[:title]).to include("can't be blank")
+      task_without_title = build(:task, title: "") # タイトルがないタスクを作成
+      expect(task_without_title).to be_invalid # 有効かチェック
+      expect(task_without_title.errors[:title]).to eq ["can't be blank"]
     end
 
     # ステータスなしでは無効
     it 'is invalid without status' do
-      user = FactoryBot.build(:user)
-      task = FactoryBot.build(:task, status: nil, user: user)
-      task.valid?
-      expect(task.errors[:status]).to include("can't be blank")
+      task_without_status = build(:task, status: nil) # ステータスがないタスクを作成
+      expect(task_without_status).to be_invalid # 有効かチェック
+      expect(task_without_status.errors[:status]).to eq ["can't be blank"]
     end
 
     # 重複しているタイトルは無効
     it 'is invalid with a duplicate title' do
-      user = FactoryBot.build(:user)
-      FactoryBot.create(:task, title: 'title', user: user)
-      task = FactoryBot.build(:task, title: 'title', user: user)
-      task.valid?
-      expect(task.errors[:title]).to include("has already been taken")
+      task = create(:task) # 有効なタスクを作成
+      task_with_duplicated_title = build(:task, title: task.title) # タイトルが重複するタスクを作成
+      expect(task_with_duplicated_title).to be_invalid # ２個目のタスクが有効かチェック
+      expect(task_with_duplicated_title.errors[:title]).to eq ["has already been taken"]
     end
 
     # 別のタイトルでは有効
     it 'is valid with another title' do
-      user = FactoryBot.build(:user)
-      base_task = FactoryBot.create(:task, title: 'title', user: user)
-      other_task = FactoryBot.build(:task, title: 'titletitle', user: user)
-      expect(other_task).not_to be base_task
+      task = create(:task) # 有効なタスク作成
+      task_with_another_title = build(:task, title: 'another_title') # 別のタイトルを持つタスクを作成
+      expect(task_with_another_title).to be_valid # ２個目のタスクが有効かチェック
+      expect(task_with_another_title.errors).to be_empty
     end
   end
 end
