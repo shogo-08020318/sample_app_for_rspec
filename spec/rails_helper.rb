@@ -64,5 +64,5 @@ RSpec.configure do |config|
 
   config.include FactoryBot::Syntax::Methods
   # ログインモジュールを読み込む
-  config.include TestLogin
+  config.include LoginMacros
 end
