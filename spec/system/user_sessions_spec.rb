@@ -7,8 +7,8 @@ RSpec.describe "UserSessions", type: :system do
     context 'フォームの入力値が正常' do
       it 'ログイン処理が成功する' do
         visit login_path
-        fill_in 'email', with: user.email
-        fill_in 'password', with: 'password'
+        fill_in 'Email', with: user.email
+        fill_in 'Password', with: 'password'
         click_button 'Login'
         expect(page).to have_content 'Login successful'
         expect(current_path).to eq root_path
@@ -17,8 +17,8 @@ RSpec.describe "UserSessions", type: :system do
     context 'フォームが未入力' do
       it 'ログイン処理が失敗する' do
         visit login_path
-        fill_in 'email', with: ''
-        fill_in 'password', with: ''
+        fill_in 'Email', with: ''
+        fill_in 'Password', with: 'password'
         click_button 'Login'
         expect(page).to have_content 'Login failed'
         expect(current_path).to eq login_path
