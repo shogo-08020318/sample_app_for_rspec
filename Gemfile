@@ -18,6 +18,12 @@ group :development, :test do
   gem 'factory_bot_rails'
 end
 
+# rspec編課題3で追加
+group :test do
+  gem 'capybara'
+  gem 'webdrivers'
+end
+
 group :development do
   gem 'web-console', '>= 3.3.0'
   gem 'listen', '>= 3.0.5', '< 3.2'
