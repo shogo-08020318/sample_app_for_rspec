@@ -7,33 +7,36 @@ RSpec.describe "Tasks", type: :system do
   let(:task) { create(:task) }
 
   describe 'ログイン前' do
-    describe '画面遷移' do
-      context 'タスク新規作成画面にアクセス' do
-        it 'ログインしていないので失敗する' do
+    describe 'ページ遷移確認' do
+      context 'タスクの新規登録ページにアクセス' do
+        it '新規登録ページへのアクセスが失敗する' do
           visit new_task_path
           expect(page).to have_content 'Login required' # ログインが必要のメッセージ
           expect(current_path).to eq login_path # ログインが画面にリダイレクト
         end
       end
-      context 'タスク一覧画面にアクセス' do
-        it '全てのタスクが表示される' do
+
+      context 'タスク一覧ページにアクセス' do
+        it 'すべてのユーザーのタスク情報が表示される' do
           task_list = create_list(:task, 3) # まとめて５個のデータを作成
           visit tasks_path
-          expect(page).to  have_content task_list[0].title # それぞれのタイトルが表示されているか
-          expect(page).to  have_content task_list[1].title
-          expect(page).to  have_content task_list[2].title
+          expect(page).to have_content task_list[0].title # それぞれのタイトルが表示されているか
+          expect(page).to have_content task_list[1].title
+          expect(page).to have_content task_list[2].title
           expect(current_path).to eq tasks_path
         end
       end
-      context 'タスク詳細画面にアクセス' do
-        it 'あるタスクの詳細が表示' do
+
+      context 'タスクの詳細ページにアクセス' do
+        it 'タスクの詳細情報が表示される' do
           visit task_path(task) # letでローカル変数を定義
           expect(page).to have_content task.title
           expect(current_path).to eq task_path(task)
         end
       end
-      context 'タスク編集画面にアクセス' do
-        it 'ログインしていないので失敗する' do
+
+      context 'タスク編集ページにアクセス' do
+        it '編集ページのアクセスが失敗する' do
           visit edit_task_path(task)
           expect(page).to have_content 'Login required'
           expect(current_path).to eq login_path
@@ -45,8 +48,8 @@ RSpec.describe "Tasks", type: :system do
   describe 'ログイン後' do
     before { login_as(user) }
 
-    describe 'タスク新規作成' do
-      context '入力項目が有効' do
+    describe 'タスク新規登録' do
+      context 'フォームの入力値が正常' do
         it 'タスクの新規作成が成功する' do
           visit new_task_path
           fill_in "Title", with: 'test_title'
@@ -59,7 +62,6 @@ RSpec.describe "Tasks", type: :system do
           expect(page).to have_content 'Content: test_content'
           expect(page).to have_content 'Status: doing'
           expect(page).to have_content 'Deadline: 2021/3/10 12:30'
-          expect(page).to have_content 'Task was successfully created.'
           expect(current_path).to eq '/tasks/1'
         end
       end
@@ -79,8 +81,8 @@ RSpec.describe "Tasks", type: :system do
       context '重複しているタイトルを入力' do
         it 'タスクの新規作成が失敗する' do
           visit new_task_path
-          test_task = create(:task) # あるタスクを作成
-          fill_in 'Title', with: test_task.title # 上記のタイトルと同じものを作成
+          other_task = create(:task) # あるタスクを作成
+          fill_in 'Title', with: other_task.title # 上記のタイトルと同じものを作成
           fill_in 'Content', with: 'test_content'
           click_button 'Create Task'
           expect(page).to have_content '1 error prohibited this task from being saved:'
@@ -94,11 +96,11 @@ RSpec.describe "Tasks", type: :system do
     describe 'タスク編集' do
       # 編集前のデータを作成
       let(:task) { create(:task, user: user) }
-      let(:test_task) { create(:task, user: user) } # 重複のテスト用
+      let(:other_task) { create(:task, user: user) } # 重複のテスト用
+      before { visit edit_task_path(task) }
 
-      context '入力項目が有効' do
-        it 'タスクの編集が完了する' do
-          visit edit_task_path(task)
+      context 'フォームの入力値がが有効' do
+        it 'タスクの編集が成功する' do
           fill_in 'Title', with: 'update_title'
           select 'done', from: 'Status'
           click_button 'Update Task'
@@ -111,7 +113,6 @@ RSpec.describe "Tasks", type: :system do
 
       context 'タイトルが未入力' do
         it 'タスクの編集が失敗する' do
-          visit edit_task_path(task)
           fill_in 'Title', with: ''
           select :todo, from: 'Status'
           click_button 'Update Task'
@@ -123,8 +124,7 @@ RSpec.describe "Tasks", type: :system do
 
       context '重複しているタイトルを入力' do
         it 'タスクの編集が失敗する' do
-          visit edit_task_path(task)
-          fill_in 'Title', with: test_task.title
+          fill_in 'Title', with: other_task.title
           select :todo, from: 'Status'
           click_button 'Update Task'
           expect(page).to have_content '1 error prohibited this task from being saved:'
